@@ -1,0 +1,38 @@
+server:
+  addr:
+  port: 8080
+  read_timeout: 5
+  write_timeout: 10
+  env: test
+
+database:
+  host: "localhost"
+  port: 3306
+  user: "frog_admin"
+  password: "frog798"
+  dbname: "frog"
+
+cache:
+  type: redis
+  redis:
+    addr: "localhost:6379"
+    password: ""
+    db: 0
+  max_size: 1000
+  expiration: 3600
+
+image:
+  max_width: 4096
+  max_height: 4096
+  allowed_formats:
+    - jpeg
+    - png
+    - webp
+  quality: 85
+  download_timeout: 120
+  process_timeout: 10
+
+log:
+  level: info
+  format: json
+  output: stdout 
