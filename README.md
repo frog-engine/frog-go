@@ -1,23 +1,101 @@
 # Frog-transcode - Fast Image Processing Service
 
 ## Overview
-Frog转码是面向业务需求的高性能实时图片转码服务，专门用于处理高并发的图片转码请求。服务支持多种图片格式转换、尺寸调整和压缩等，目标响应时间控制在 500ms 以内。
+Frog转码是面向业务需求的高性能实时以及异步图片转码服务，专门用于处理高并发的图片转码请求。服务支持多种图片格式转换、尺寸调整和压缩等。同步图片转码目标响应时间控制在 300ms 以内，异步服务控制在2s内。
 
 ## 核心特性
 - 高并发支持 (10000+ QPS)
-- 低延迟响应 (< 500ms)
+- 低延迟响应 (< 300ms)
 - 图片格式转换 (支持 JPEG/PNG/WebP/AVIF)
 - 图片尺寸调整 (自定义尺寸缩放和裁剪)
 - 图片质量压缩 (支持自定义质量等级)
 - 内存缓存机制 (支持本地内存缓存与远程缓存)
 
 ## 系统架构
+<!--
 | 层级    | 内容                                                                                      |
 |---------|-------------------------------------------------------------------------------------------|
 | 应用层  | `商品图` `头像图` `广告图` `分享图`等                                                            |
 | 服务层  |  `API(同步转码/异步转码)` `调度(任务队列/资源调度)` `执行(SDK调用)`                            |
-| SDK层   | `生产类转码API(转格式/压缩/缩放)` `制作类转码API(裁剪/合并/叠加/旋转/缩放/美化/特效)`        |
-| 工具层  | `转码(FFmpeg)` `制作(ImageMagick)` `Webpmux` `增强(ZoomAI/PromeAI) `                                    |
+| SDK层   | `生产类转码API(格式/压缩/缩放)` `制作类转码API(裁剪/合并/叠加/旋转/缩放/美化/特效)`        |
+| 工具层  | `转码(FFmpeg/Webpmux/TinyPNG)` `制作(ImageMagick/GraphicsMagick)` `增强(ZoomAI/PromeAI) `                                    |
+-->
+
+```mermaid
+flowchart TD
+  %% 样式定义
+  style A fill:#4AABE3FF,stroke:#333,stroke-width:2px,width:840px;
+    style A1 width:140px;
+    style A2 width:140px;
+    style A3 width:140px;
+    style A4 width:140px;
+  style B fill:#E37323FF,stroke:#333,stroke-width:2px,width:850px;
+    style B1 width:210px;
+    style B2 width:210px;
+    style B3 width:210px;
+  style C fill:#0C9626FF,stroke:#333,stroke-width:2px,width:850px;
+    style C1 width:310px;
+    style C2 width:310px;
+  style D fill:#C64138FF,stroke:#333,stroke-width:2px,width:850px;
+    style D1 width:220px;
+    style D2 width:220px;
+    style D3 width:220px;
+
+
+  %% 居中调整
+  class A center;
+  class B center;
+  class C center;
+  class D center;
+
+  %% 居中控制的 CSS 类
+  classDef center text-align:center;
+  class A layerFontSize;
+  class B layerFontSize;
+  class C layerFontSize;
+  class D layerFontSize;
+
+  %% 分层标题字体大小设置
+  classDef layerFontSize font-size:24px, font-weight:bold;
+
+  %% 应用层
+  subgraph A[应用层]
+    direction TB
+    A1(商品图)
+    A2(头像图)
+    A3(广告图)
+    A4(分享图)
+  end
+
+  %% 服务层
+  subgraph B[服务层]
+    direction TB
+    B1(API：同步转码/异步转码)
+    B2(调度：任务队列/资源调度)
+    B3(执行：SDK调用)
+  end
+
+  %% SDK层
+  subgraph C[SDK层]
+    direction TB
+    C1(生产类转码API：格式/压缩/缩放)
+    C2(制作类转码API：裁剪/合并/叠加/旋转/缩放/美化/特效)
+  end
+
+  %% 工具层
+  subgraph D[工具层]
+    direction TB
+    D1(转码：FFmpeg/Webpmux/TinyPNG)
+    D2(制作：ImageMagick/GraphicsMagick)
+    D3(增强：ZoomAI/PromeAI)
+  end
+
+  %% 层级连接
+  A --> B
+  B --> C
+  C --> D
+
+```
 
 ## 转码流程
 [查看转码流程图](./Process.md)
