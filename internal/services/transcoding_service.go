@@ -8,32 +8,37 @@
 package services
 
 import (
-	"context"
-	"fmt"
-	"time"
+  "context"
+  "fmt"
+  "time"
 
-	"frog-go/internal/cache"
-	"frog-go/internal/tools"
-	"frog-go/internal/utils"
-	"frog-go/pkg/logger"
+  "github.com/frog-engine/frog-go/internal/repositories"
+  "github.com/frog-engine/frog-go/internal/tools"
+  "github.com/frog-engine/frog-go/internal/utils"
+  "github.com/frog-engine/frog-go/pkg/logger"
+
+  "github.com/gofiber/fiber/v3"
 )
 
 type TranscodingService struct {
-  cache      *cache.ImageCache
-  imageTools *tools.ImageTools
+  cache      repositories.Cache
+  imageTools tools.ImageTools
 }
 
-func NewTranscodingService(cache *cache.ImageCache, tools *tools.ImageTools) *TranscodingService {
+func NewTranscodingService(cache repositories.Cache, imageTools *tools.ImageTools) *TranscodingService {
   return &TranscodingService{
     cache:      cache,
-    imageTools: tools,
+    imageTools: *imageTools,
   }
 }
 
 // ProcessImage 处理图片转码
-func (s *TranscodingService) ProcessImage(ctx context.Context, imageURL, width, height, format string) ([]byte, error) {
+func (s *TranscodingService) ProcessImage(c fiber.Ctx, imageURL string, width int, height int, format string) ([]byte, error) {
   // 生成缓存key
-  cacheKey := fmt.Sprintf("%s_%s_%s_%s", imageURL, width, height, format)
+  cacheKey := fmt.Sprintf("%s_%d_%d_%s", imageURL, width, height, format)
+
+  // 从 Fiber context 获取原生 context
+  ctx := c.Context()
 
   // 设置处理超时
   ctx, cancel := context.WithTimeout(ctx, 450*time.Millisecond)
@@ -46,13 +51,24 @@ func (s *TranscodingService) ProcessImage(ctx context.Context, imageURL, width, 
   }
 
   // 下载原图
-  originalImage, err := utils.DownloadImage(ctx, imageURL)
+  originalImageData, err := utils.DownloadImage(ctx, imageURL)
   if err != nil {
     return nil, fmt.Errorf("download failed: %w", err)
   }
 
-  // 图片处理
-  processedImage, err := s.imageTools.Process(ctx, originalImage, width, height, format)
+  // originalImage, _, err := image.Decode(bytes.NewReader(originalImageData))
+  // if err != nil {
+  //   return nil, fmt.Errorf("download failed: %w", err)
+  // }
+
+  // // 图片处理
+  // imageBytes, err := utils.ImageToBytes(originalImage, format)
+  // if err != nil {
+  //   return nil, fmt.Errorf("image conversion failed: %w", err)
+  // }
+  // processedImage, err := s.imageTools.Process(c, imageBytes, width, height, format)
+
+  processedImage, err := s.imageTools.Process(c, originalImageData, width, height, format)
   if err != nil {
     return nil, fmt.Errorf("processing failed: %w", err)
   }

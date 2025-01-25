@@ -9,10 +9,11 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
-	"frog-go/internal/models"
-	"frog-go/internal/utils"
-	"log"
 	"strings"
+
+	"github.com/frog-engine/frog-go/internal/models"
+	"github.com/frog-engine/frog-go/internal/utils"
+	"github.com/frog-engine/frog-go/pkg/logger"
 )
 
 // BaseRepository 提供泛型接口
@@ -52,7 +53,7 @@ func (repo *BaseRepositoryImpl[T]) mapRowsToEntity(rows *sql.Rows) ([]T, error) 
 	for rows.Next() {
 		var entity T
 		if _, err := utils.MapScannerToEntity(rows, &entity); err != nil {
-			log.Printf("Error mapping row to entity: %v", err)
+			logger.Printf("Error mapping row to entity: %v", err)
 			return nil, err
 		}
 		entities = append(entities, entity)
@@ -67,7 +68,7 @@ func (repo *BaseRepositoryImpl[T]) mapRowsToEntity(rows *sql.Rows) ([]T, error) 
 
 // FindByID 查找指定ID的实体
 func (repo *BaseRepositoryImpl[T]) FindByID(id int, query string) (*T, error) {
-	log.Println("BaseRepositoryImpl->FindByID:", id, query)
+	logger.Printf("BaseRepositoryImpl->FindByID: ID=%d, Query=%s\n", id, query)
 	row := repo.db.QueryRow(query, id)
 	var entity T
 	if err := repo.mapRowToEntity(row, &entity); err != nil {
@@ -78,7 +79,7 @@ func (repo *BaseRepositoryImpl[T]) FindByID(id int, query string) (*T, error) {
 
 // FindAll 查找所有实体，不推荐直接使用，此处仅为示例
 func (repo *BaseRepositoryImpl[T]) FindAll(query string) ([]T, error) {
-	log.Println("BaseRepositoryImpl->FindAll:", query)
+	logger.Printf("BaseRepositoryImpl->FindAll: Query=%s\n", query)
 	rows, err := repo.db.Query(query)
 	if err != nil {
 		return nil, err
@@ -140,18 +141,18 @@ func (repo *BaseRepositoryImpl[T]) IsRecordExists(
 
 // Create 创建实体
 func (repo *BaseRepositoryImpl[T]) Create(query string, args ...interface{}) (int64, error) {
-	log.Println("BaseRepositoryImpl->Create:", query, args)
+	logger.Printf("BaseRepositoryImpl->Create: Query=%s, Args=%v\n", query, args)
 	// 执行插入 SQL 查询
 	result, err := repo.db.Exec(query, args...)
 	if err != nil {
-			log.Println("Error executing insert query:", err)
+			logger.Printf("Error executing insert query: %v\n", err)
 			return 0, fmt.Errorf("failed to execute insert query: %w", err)
 	}
 
 	// 获取插入的 ID
 	lastInsertID, err := result.LastInsertId()
 	if err != nil {
-			log.Println("Error getting last insert id:", err)
+			logger.Printf("Error getting last insert id: %v\n", err)
 			return 0, fmt.Errorf("failed to retrieve last insert id: %w", err)
 	}
 
@@ -160,14 +161,14 @@ func (repo *BaseRepositoryImpl[T]) Create(query string, args ...interface{}) (in
 
 // Update 更新实体
 func (repo *BaseRepositoryImpl[T]) Update(query string, args []interface{}) error {
-	log.Println("BaseRepositoryImpl>Update:", query, args)
+	logger.Printf("BaseRepositoryImpl>Update: Query=%s, Args=%v\n", query, args)
   _, err := repo.db.Exec(query, args...)
   return err
 }
 
 // Delete 删除实体
 func (repo *BaseRepositoryImpl[T]) Delete(query string, id int) (int64, error)  {
-	log.Println("BaseRepositoryImpl>Delete:", query, id)
+	logger.Printf("BaseRepositoryImpl>Delete: Query=%s, ID=%d\n", query, id)
 		result, err := repo.db.Exec(query, id)
 		if err != nil {
 			return 0, err
@@ -201,7 +202,7 @@ func (repo *BaseRepositoryImpl[T]) FindWithPagination(
 	countQuery := fmt.Sprintf("SELECT COUNT(*) FROM %s %s", tableName, whereClause)
 	err := repo.db.QueryRow(countQuery).Scan(&total)
 	if err != nil {
-		log.Printf("统计总数出错: %v\n", err)
+		logger.Printf("统计总数出错: %v\n", err)
 		total = 0 // 出错时总数设为0
 	}
 
@@ -211,11 +212,11 @@ func (repo *BaseRepositoryImpl[T]) FindWithPagination(
 		FROM %s %s
 		LIMIT ? OFFSET ?`, selectFields, tableName, whereClause)
 
-	log.Println("BaseRepositoryImpl->FindWithPagination:", query, limit, offset)
+	logger.Printf("BaseRepositoryImpl->FindWithPagination: Query=%s, Limit=%d, Offset=%d\n", query, limit, offset)
 
 	rows, err := repo.db.Query(query, limit, offset)
 	if err != nil {
-		log.Printf("分页查询出错: %v\n", err)
+		logger.Printf("分页查询出错: %v\n", err)
 		return []map[string]interface{}{}, total, nil // 返回空数据但不中断程序
 	}
 	defer rows.Close()
@@ -224,7 +225,7 @@ func (repo *BaseRepositoryImpl[T]) FindWithPagination(
 	var results []map[string]interface{}
 	columns, err := rows.Columns()
 	if err != nil {
-		log.Printf("获取列名出错: %v\n", err)
+		logger.Printf("获取列名出错: %v\n", err)
 		return []map[string]interface{}{}, total, nil
 	}
 
@@ -238,7 +239,7 @@ func (repo *BaseRepositoryImpl[T]) FindWithPagination(
 		}
 
 		if err := rows.Scan(valuePtrs...); err != nil {
-			log.Printf("数据扫描出错: %v\n", err)
+			logger.Printf("数据扫描出错: %v\n", err)
 			continue // 跳过出错的行
 		}
 
@@ -253,7 +254,7 @@ func (repo *BaseRepositoryImpl[T]) FindWithPagination(
 	}
 
 	if err = rows.Err(); err != nil {
-		log.Printf("遍历数据行出错: %v\n", err)
+		logger.Printf("遍历数据行出错: %v\n", err)
 	}
 
 	// 返回结果和总记录数
@@ -265,10 +266,10 @@ func (repo *BaseRepositoryImpl[T]) GroupBy(entity interface{}, tableName, field 
 	// 获取有效字段
 	fieldsMap, err := utils.GetStructFieldsByTag(entity, "db")
 	if err != nil {
-		log.Println("Error getting valid fields:", err)
+		logger.Printf("Error getting valid fields: %v\n", err)
 		return nil, err
 	}
-	log.Println("BaseRepository->GroupBy:fieldsMap", fieldsMap)
+	logger.Printf("BaseRepository->GroupBy:fieldsMap: %v\n", fieldsMap)
 
 	// 校验字段是否合法，判断map中的key是否存在
 	validFields := strings.Split(field, ",") // 支持多个字段，逗号分隔
@@ -283,12 +284,12 @@ func (repo *BaseRepositoryImpl[T]) GroupBy(entity interface{}, tableName, field 
 	selectFields := strings.Join(validFields, ", ")
 	groupByClause := strings.Join(validFields, ", ")
 	query := fmt.Sprintf("SELECT %s, COUNT(*) FROM %s GROUP BY %s", selectFields, tableName, groupByClause)
-	log.Println("BaseRepository->GroupBy:query", query)
+	logger.Printf("BaseRepository->GroupBy:query: %s\n", query)
 
 	// 执行 SQL 查询
 	rows, err := repo.db.Query(query)
 	if err != nil {
-		log.Println("Error executing query:", err)
+		logger.Printf("Error executing query: %v\n", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -305,7 +306,7 @@ func (repo *BaseRepositoryImpl[T]) GroupBy(entity interface{}, tableName, field 
 		// 扫描查询结果
 		var count int
 		if err := rows.Scan(append(groupValues, &count)...); err != nil {
-			log.Println("Error scanning row:", err)
+			logger.Printf("Error scanning row: %v\n", err)
 			return nil, err
 		}
 
@@ -322,7 +323,7 @@ func (repo *BaseRepositoryImpl[T]) GroupBy(entity interface{}, tableName, field 
 
 	// 检查查询是否出错
 	if err := rows.Err(); err != nil {
-		log.Println("Error in rows:", err)
+		logger.Printf("Error in rows: %v\n", err)
 		return nil, err
 	}
 

@@ -2,10 +2,10 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"sync"
 
+	"github.com/frog-engine/frog-go/pkg/logger"
 	"gopkg.in/yaml.v2"
 )
 
@@ -103,9 +103,9 @@ func Init(env *string) {
 		cfg, err := LoadConfig[Config](filePath); 
     if err == nil {
       configInstance = cfg
-      log.Println("Configuration initialized successfully.")
+      logger.Println("Configuration initialized successfully.")
     } else {
-      log.Fatalf("Failed to initialize config: %v", err)
+      logger.Fatalf("Failed to initialize config: %v", err)
     }
   }
 }

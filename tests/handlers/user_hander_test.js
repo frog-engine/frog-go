@@ -8,8 +8,8 @@ fetch("http://127.0.0.1:8080/api/user", {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    "name": "用户1",
-    "email": "user@xx.com",
+    "name": "用户1" + new Date().getTime(),
+    "email": "user" + new Date().getTime() + "@xx.com",
     "phone": "124537890",
     "wechat": "mywechat",
     "address": "用户1 Address"
@@ -23,7 +23,7 @@ fetch("http://127.0.0.1:8080/api/user", {
     return response.json();
   })
   .then(data => {
-    console.log("User created successfully:", data);
+    console.log("User created result:", data);
   })
   .catch(error => {
     console.error("Error creating user:", error);
@@ -52,7 +52,7 @@ fetch("http://127.0.0.1:8080/api/user", {
     return response.json();
   })
   .then(data => {
-    console.log("User updated successfully:", data);
+    console.log("User updated result:", data);
   })
   .catch(error => {
     console.error("Error updating user:", error);
@@ -72,7 +72,7 @@ fetch("http://127.0.0.1:8080/api/user/1", {
     return response.json();
   })
   .then(data => {
-    console.log("Users get successfully:", data);
+    console.log("Users get result:", data);
   })
   .catch(error => {
     console.error("Error getting user:", error);
@@ -92,7 +92,7 @@ fetch("http://127.0.0.1:8080/api/users", {
     return response.json();
   })
   .then(data => {
-    console.log("User get successfully:", data);
+    console.log("User get result:", data);
   })
   .catch(error => {
     console.error("Error getting user:", error);
@@ -113,7 +113,7 @@ fetch("http://127.0.0.1:8080/api/user/31", {
     return response.json();
   })
   .then(data => {
-    console.log("User updated successfully:", data);
+    console.log("User updated result:", data);
   })
   .catch(error => {
     console.error("Error updating user:", error);
@@ -134,7 +134,7 @@ fetch(`http://127.0.0.1:8080/api/user/list?page=1&size=9&condition=email%20like%
     return response.json();
   })
   .then(data => {
-    console.log("User updated successfully:", data);
+    console.log("User updated result:", data);
   })
   .catch(error => {
     console.error("Error updating user:", error);
@@ -155,7 +155,7 @@ fetch(`http://127.0.0.1:8080/api/user/group?field=name,email`, {
     return response.json();
   })
   .then(data => {
-    console.log("User updated successfully:", data);
+    console.log("User updated result:", data);
   })
   .catch(error => {
     console.error("Error updating user:", error);

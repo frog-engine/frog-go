@@ -11,16 +11,17 @@ import (
   "bytes"
   "encoding/json"
   "fmt"
-  "frog-go/internal/models"
   "io"
   "net/http"
   "strconv"
   "testing"
   "time"
+
+  "github.com/frog-engine/frog-go/internal/models"
 )
 
 // TestUser 测试用例
-// $ go test -run TestUser
+// $ go test -run TestUser -v
 // Base URL
 const baseURL = "http://127.0.0.1:8080/api/user"
 
@@ -34,8 +35,8 @@ func TestUser(t *testing.T) {
     address := "Test Address"
 
     user := models.User{
-      Name:    "测试用户",
-      Email:   "testuser" + time.DateTime + "@example.com",
+      Name:    "测试用户" + strconv.FormatInt(time.Now().Unix(), 10),
+      Email:   "testuser" + strconv.FormatInt(time.Now().Unix(), 10) + "@example.com",
       Phone:   "1234567890",
       Wechat:  &wechat,
       Address: &address,
@@ -59,7 +60,7 @@ func TestUser(t *testing.T) {
     }
     defer resp.Body.Close()
 
-    if resp.StatusCode != http.StatusCreated {
+    if resp.StatusCode != http.StatusOK {
       bodyBytes, err := io.ReadAll(resp.Body)
       if err != nil {
         t.Fatalf("Error reading response body: %v", err)

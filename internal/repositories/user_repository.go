@@ -9,10 +9,11 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
-	"frog-go/internal/models"
-	"frog-go/internal/utils"
-	"log"
 	"strings"
+
+	"github.com/frog-engine/frog-go/internal/models"
+	"github.com/frog-engine/frog-go/internal/utils"
+	"github.com/frog-engine/frog-go/pkg/logger"
 )
 
 // UserRepository 定义用户数据操作接口
@@ -43,10 +44,10 @@ import (
 	 query := `SELECT * FROM users WHERE id = ?`
 	 user, err := repo.baseRepo.FindByID(id, query)
 	 if err != nil {
-		 log.Println("FindByID error:", err)
+		 logger.Printf("FindByID error: %v\n", err)
 		 return nil, err
 	 }
-	 log.Println("FindByID result:", user)
+	 logger.Printf("FindByID result: %+v\n", user)
 	 return user, nil
  }
  
@@ -55,11 +56,11 @@ import (
 	 query := `SELECT * FROM users`
 	 users, err := repo.baseRepo.FindAll(query)
 	 if err != nil {
-		 log.Println("FindAll error:", err)
+		 logger.Printf("FindAll error: %v\n", err)
 		 return nil, err
 	 }
-	 log.Println("FindAll result:", users)
-	 return append([]models.User{}, users...), nil
+	 logger.Printf("FindAll result: %+v\n", users)
+	 return users, nil
  }
  
  // ExistsByConditions 检查满足指定条件且排除某些条件的用户记录是否存在
@@ -83,7 +84,7 @@ import (
 		 return -1, fmt.Errorf("failed to create user: %w", err)
 	 }
  
-	 log.Println("Create result: Last Insert ID:", lastInsertID)
+	 logger.Printf("Create result: Last Insert ID: %d\n", lastInsertID)
 	 return lastInsertID, nil
  }
  
@@ -99,7 +100,7 @@ import (
  
 	 err = repo.baseRepo.Update(query, args)
 	 if err != nil {
-		 log.Println("Update error:", err)
+		 logger.Printf("Update error: %v\n", err)
 	 }
 	 return err
  }
@@ -109,44 +110,44 @@ import (
 	 query := `DELETE FROM users WHERE id = ?`
 	 result, err := repo.baseRepo.Delete(query, id)
 	 if err != nil {
-		 log.Println("Delete error:", err)
+		logger.Printf("Delete error: %v, User ID: %d\n", err, id)
 	 }
 	 return result, err
  }
  
- // FindPaged 分页查询用户
- func (repo *SQLUserRepository) FindPaged(page int, size int, fields []string, condition string) ([]models.User, *models.Pagination, error) {
-	 pagination := models.NewPagination(page, size, 0)
-	 tableName := "users"
+// FindPaged 分页查询用户
+func (repo *SQLUserRepository) FindPaged(page int, size int, fields []string, condition string) ([]models.User, *models.Pagination, error) {
+	pagination := models.NewPagination(page, size, 0)
+	tableName := "users"
+
+	results, total, err := repo.baseRepo.FindWithPagination(tableName, fields, condition, pagination)
+	if err != nil {
+		logger.Printf("FindPaged error: %v, Page: %d, Size: %d, Condition: %s\n", err, page, size, condition)
+		return nil, pagination, err
+	}
+	pagination.Total = total
+
+	var users []models.User
+	for _, row := range results {
+		var user models.User
+		if err := utils.MapRowToStruct(row, &user); err != nil {
+			return nil, pagination, err
+		}
+		users = append(users, user)
+	}
+
+	logger.Printf("FindPaged results: Users: %+v, Pagination: %+v\n", users, pagination)
+	return users, pagination, nil
+}
  
-	 results, total, err := repo.baseRepo.FindWithPagination(tableName, fields, condition, pagination)
-	 if err != nil {
-		 log.Fatalln("FindPaged error:", err)
-		 return nil, pagination, err
-	 }
-	 pagination.Total = total
- 
-	 var users []models.User
-	 for _, row := range results {
-		 var user models.User
-		 if err := utils.MapRowToStruct(row, &user); err != nil {
-		//  if err := utils.MapRowToStructReflect(row, &user, []string{}); err != nil {
-			 return nil, pagination, err
-		 }
-		 users = append(users, user)
-	 }
-	 log.Println("FindPaged results:", users)
-	 return users, pagination, nil
- }
- 
- // GroupBy 根据字段进行分组统计
- func (repo *SQLUserRepository) GroupBy(field string) (map[string]int, error) {
-	 groupedData, err := repo.baseRepo.GroupBy(models.User{}, "users", field)
-	 if err != nil {
-		 log.Printf("GroupBy error for field %s: %v", field, err)
-		 return nil, err
-	 }
-	 log.Printf("GroupBy result for field %s: %+v", field, groupedData)
-	 return groupedData, nil
- }
+// GroupBy 根据字段进行分组统计
+func (repo *SQLUserRepository) GroupBy(field string) (map[string]int, error) {
+	groupedData, err := repo.baseRepo.GroupBy(models.User{}, "users", field)
+	if err != nil {
+		logger.Printf("GroupBy error for field %s: %v\n", field, err)
+		return nil, err
+	}
+	logger.Printf("GroupBy result for field %s: %+v\n", field, groupedData)
+	return groupedData, nil
+}
  

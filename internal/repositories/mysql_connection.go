@@ -9,8 +9,8 @@ package repositories
 import (
   "database/sql"
   "fmt"
-  "log"
 
+  "github.com/frog-engine/frog-go/pkg/logger"
   _ "github.com/go-sql-driver/mysql"
 )
 
@@ -33,18 +33,18 @@ func ConnectDatabase(dbConfig *DatabaseConfig) (*sql.DB, error) {
   // 连接数据库
   db, err := sql.Open("mysql", dsn)
   if err != nil {
-    log.Printf("无法连接到数据库，错误信息：%v", err)
+    logger.Printf("无法连接到数据库，错误信息：%v", err)
     return nil, fmt.Errorf("无法连接到数据库: %w", err)
   }
 
   // 确保数据库连接可用
   if err := db.Ping(); err != nil {
-    log.Printf("数据库不可用，错误信息：%v", err)
+    logger.Printf("数据库不可用，错误信息：%v", err)
     db.Close() // 连接失败时关闭数据库连接
     return nil, fmt.Errorf("数据库不可用: %w", err)
   }
 
-  log.Println("成功连接到数据库")
+  logger.Println("成功连接到数据库")
 
   return db, nil
 }

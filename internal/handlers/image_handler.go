@@ -1,5 +1,5 @@
 /**
- * Image Processing Handler
+ * Image Handler
  *
  * @author jarryli@gmail.com
  * @date 2024-12-20
@@ -8,12 +8,13 @@
 package handlers
 
 import (
-	"net/http"
-	"strconv"
+  "strconv"
 
-	"frog-go/internal/services"
-	"frog-go/pkg/logger"
-	"frog-go/pkg/response"
+  "github.com/frog-engine/frog-go/internal/services"
+  "github.com/frog-engine/frog-go/pkg/logger"
+  "github.com/frog-engine/frog-go/pkg/response"
+
+  "github.com/gofiber/fiber/v3"
 )
 
 type ImageHandler struct {
@@ -27,37 +28,32 @@ func NewImageHandler(ts *services.TranscodingService) *ImageHandler {
 }
 
 // ProcessImage 处理图片转码请求
-func (h *ImageHandler) ProcessImage(w http.ResponseWriter, r *http.Request) {
-  ctx := r.Context()
-
+func (h *ImageHandler) ProcessImage(c fiber.Ctx) error {
   // 获取并验证参数
-  imageURL := r.URL.Query().Get("url")
-  width := r.URL.Query().Get("w")
-  height := r.URL.Query().Get("h")
-  format := r.URL.Query().Get("format")
+  imageURL := c.Query("url")
+  width := c.Query("w")
+  height := c.Query("h")
+  format := c.Query("format")
 
   if imageURL == "" {
-    response.Error(w, http.StatusBadRequest, "missing image url")
-    return
+    return response.Error(c, fiber.StatusBadRequest, "missing image url")
   }
 
   // 参数转换
   widthInt, _ := strconv.Atoi(width)
   heightInt, _ := strconv.Atoi(height)
   if widthInt <= 0 || heightInt <= 0 {
-    response.Error(w, http.StatusBadRequest, "invalid dimensions")
-    return
+    return response.Error(c, fiber.StatusBadRequest, "invalid dimensions")
   }
 
   // 调用转码服务
-  processedImage, err := h.transcodingService.ProcessImage(ctx, imageURL, width, height, format)
+  processedImage, err := h.transcodingService.ProcessImage(c, imageURL, widthInt, heightInt, format)
   if err != nil {
     logger.Errorf("Failed to process image: %v", err)
-    response.Error(w, http.StatusInternalServerError, "image processing failed")
-    return
+    return response.Error(c, fiber.StatusInternalServerError, "image processing failed")
   }
 
   // 设置响应头
-  w.Header().Set("Content-Type", "image/"+format)
-  w.Write(processedImage)
+  c.Set("Content-Type", "image/"+format)
+  return c.Send(processedImage)
 }

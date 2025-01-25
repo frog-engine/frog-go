@@ -8,15 +8,15 @@
 package middleware
 
 import (
-  "log"
-  "net/http"
   "reflect"
   "runtime"
+
+  "github.com/frog-engine/frog-go/pkg/logger"
+  "github.com/gofiber/fiber/v3"
 )
 
 // 事件链，传入handler以及中间件，依次执行
-func Chain(handler http.Handler, middlewares ...func(http.Handler) http.Handler) http.Handler {
-
+func Chain(handler fiber.Handler, middlewares ...func(fiber.Handler) fiber.Handler) fiber.Handler {
   // 按逆序添加，顺序执行中间件，更符合习惯
   for i := len(middlewares) - 1; i >= 0; i-- {
     handler = middlewares[i](handler)
@@ -26,9 +26,9 @@ func Chain(handler http.Handler, middlewares ...func(http.Handler) http.Handler)
 }
 
 // 通用 API 中间件链，适用于不同的资源处理
-func APIChain(handlerFunc func(http.ResponseWriter, *http.Request), permission string) http.Handler {
+func APIChain(handler fiber.Handler, permission string) fiber.Handler {
   return Chain(
-    http.HandlerFunc(handlerFunc),
+    handler,
     CORSMiddleware,
     RequestLoggerMiddleware,
     SSOLoginMiddleware,
@@ -37,16 +37,14 @@ func APIChain(handlerFunc func(http.ResponseWriter, *http.Request), permission s
   )
 }
 
-func PrintHanderInfo(handler http.Handler) {
-  if handlerFunc, ok := handler.(http.HandlerFunc); ok {
-    funcPointer := reflect.ValueOf(handlerFunc).Pointer()
-    function := runtime.FuncForPC(funcPointer)
-    if function != nil {
-      // log.Println("Handler name:", function.Name())
-    } else {
-      log.Println("Could not retrieve function name.")
-    }
+func PrintHandlerInfo(handler fiber.Handler) {
+  // 获取函数指针信息
+  funcPointer := reflect.ValueOf(handler).Pointer() // 获取函数指针
+  function := runtime.FuncForPC(funcPointer)        // 获取运行时函数信息
+
+  if function != nil {
+    logger.Println("Handler name:", function.Name()) // 打印函数名称
   } else {
-    log.Println("Not an http.HandlerFunc")
+    logger.Println("Could not retrieve function name.")
   }
 }

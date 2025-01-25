@@ -10,9 +10,10 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 	"strings"
+
+	"github.com/frog-engine/frog-go/pkg/logger"
 )
 
 // GetStructFieldsByTag 根据给定的标签名获取结构体中的字段名称，并返回一个 map，
@@ -70,7 +71,7 @@ import (
  
 	 // 处理 scanner 类型
 	 if err := scanner.Scan(scanArgs...); err != nil {
-		 log.Printf("扫描数据到结构体时发生错误: %v", err)
+		 logger.Printf("扫描数据到结构体时发生错误: %v", err)
 		 return nil, fmt.Errorf("无法扫描数据到实体: %w", err)
 	 }
  
@@ -288,7 +289,7 @@ func MapRowToStruct(row map[string]interface{}, entity interface{}) error {
 		 // 获取字段
 		 structField := entityValue.FieldByName(fieldName)
 		 if !structField.IsValid() || !structField.CanSet() {
-			 log.Printf("Field %s is invalid or cannot be set", fieldName)
+			 logger.Printf("Field %s is invalid or cannot be set", fieldName)
 			 continue
 		 }
  
@@ -304,13 +305,13 @@ func MapRowToStruct(row map[string]interface{}, entity interface{}) error {
 		 // 从 row 获取值
 		 value, exists := row[key]
 		 if !exists {
-			 log.Printf("Key %s not found in row", key)
+			 logger.Printf("Key %s not found in row", key)
 			 continue
 		 }
  
 		 val := reflect.ValueOf(value)
 		 if !val.IsValid() {
-			 log.Printf("Value for key %s is invalid", key)
+			 logger.Printf("Value for key %s is invalid", key)
 			 continue
 		 }
  
@@ -318,7 +319,7 @@ func MapRowToStruct(row map[string]interface{}, entity interface{}) error {
 		 switch val.Kind() {
 		 case reflect.Ptr, reflect.Interface, reflect.Slice, reflect.Map, reflect.Chan, reflect.Func:
 			 if val.IsNil() {
-				 log.Printf("Value for key %s is nil", key)
+				 logger.Printf("Value for key %s is nil", key)
 				 continue
 			 }
 		 }
@@ -334,7 +335,7 @@ func MapRowToStruct(row map[string]interface{}, entity interface{}) error {
 			 ptrValue.Elem().Set(val)
 			 structField.Set(ptrValue)
 		 } else {
-			 log.Printf("type mismatch for field %s: expected %s, got %s", fieldName, structField.Type(), val.Type())
+			 logger.Printf("type mismatch for field %s: expected %s, got %s", fieldName, structField.Type(), val.Type())
 			 return nil
 		 }
 	 }
