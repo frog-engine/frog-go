@@ -8,10 +8,11 @@
 package cache
 
 import (
-	"sync"
-	"time"
+  "image"
+  "sync"
+  "time"
 
-	"github.com/patrickmn/go-cache"
+  "github.com/patrickmn/go-cache"
 )
 
 type ImageCache struct {
@@ -42,4 +43,20 @@ func (ic *ImageCache) Set(key string, data []byte) {
   defer ic.mutex.Unlock()
 
   ic.cache.Set(key, data, cache.DefaultExpiration)
+}
+
+func (ic *ImageCache) SetImage(key string, value image.Image) {
+  ic.mutex.Lock()
+  defer ic.mutex.Unlock()
+  ic.cache.Set(key, value, cache.DefaultExpiration)
+}
+
+func (ic *ImageCache) GetImage(key string) (image.Image, bool) {
+  ic.mutex.RLock()
+  defer ic.mutex.RUnlock()
+
+  if data, found := ic.cache.Get(key); found {
+    return data.(image.Image), true
+  }
+  return nil, false
 }

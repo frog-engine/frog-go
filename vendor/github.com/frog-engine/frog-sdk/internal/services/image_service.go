@@ -1,9 +1,7 @@
 package services
 
 import (
-  "bytes"
   "fmt"
-  "image"
   "os"
   "path/filepath"
 
@@ -63,13 +61,13 @@ func (s *ImageService) ImageTranscode(req *models.ConvertRequest) (*models.Conve
 }
 
 // ReadImageBlob 用于读取图像数据并进行解码处理
-func (s *ImageService) ReadImageBlob(imageData []byte) (image.Image, error) {
+func (s *ImageService) ReadImageBlob(imageData []byte) ([]byte, error) {
   // 使用 image.Decode 函数来解码图像数据
-  img, _, err := image.Decode(bytes.NewReader(imageData))
-  if err != nil {
-    return nil, fmt.Errorf("failed to decode image data: %w", err)
-  }
+  // img, _, err := image.Decode(bytes.NewReader(imageData))
+  // if err != nil {
+  //   return nil, fmt.Errorf("failed to decode image data: %w", err)
+  // }
 
   // 返回解码后的图像对象
-  return img, nil
+  return imageData, nil
 }

@@ -1,6 +1,6 @@
 /**
- * Image Transcoding Service
- * @description 负责转码调用
+ * Image Image Service
+ * @description 负责图片处理调用
  * @author jarryli@gmail.com
  * @date 2024-12-20
  */
@@ -21,20 +21,20 @@ import (
   "github.com/gofiber/fiber/v3"
 )
 
-type TranscodingService struct {
+type ImageService struct {
   cache      repositories.Cache
   imageTools tools.ImageTools
 }
 
-func NewTranscodingService(cache repositories.Cache, imageTools *tools.ImageTools) *TranscodingService {
-  return &TranscodingService{
+func NewImageService(cache repositories.Cache, imageTools *tools.ImageTools) *ImageService {
+  return &ImageService{
     cache:      cache,
     imageTools: *imageTools,
   }
 }
 
 // ProcessImage 处理图片转码
-func (s *TranscodingService) ProcessImage(c fiber.Ctx, imageRequest models.ImageRequest) ([]byte, error) {
+func (s *ImageService) ProcessImage(c fiber.Ctx, imageRequest models.ImageRequest) ([]byte, error) {
   // 生成缓存key
   cacheKey := fmt.Sprintf("%s_%s_%s", imageRequest.URL, imageRequest.Crop, imageRequest.Format)
 
@@ -69,7 +69,7 @@ func (s *TranscodingService) ProcessImage(c fiber.Ctx, imageRequest models.Image
   // }
   // processedImage, err := s.imageTools.Process(c, imageBytes, width, height, format)
 
-  processedImage, err := s.imageTools.Process(c, originalImageData, 10, 10, imageRequest.Format)
+  processedImage, err := s.imageTools.Process(c, originalImageData, 100, 100, imageRequest.Format)
   if err != nil {
     return nil, fmt.Errorf("processing failed: %w", err)
   }

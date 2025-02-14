@@ -141,7 +141,7 @@ $ go run cmd/frog-go/main.go
 # {"level":"info","msg":"Server starting on :8080","time":"2024-12-26T19:32:54+08:00"}
 ```
 
-5. 开发时热部署
+5. 开发时热部署，使用air
 ```bash
 # 安装 air
 $ go install github.com/air-verse/air@latest
@@ -158,10 +158,20 @@ $ ~/go/bin/air
 # 或者直接启动air，而无需.air.toml配置文件
 $ ~/go/bin/air --build.cmd "go build -o tmp/main cmd/frog-go/main.go" --build.bin "./tmp/main"
 
-### 可以查看到启动信息，修改源码就能立即生效了
-[19:30:44] building...
-[19:30:45] running...
-{"level":"info","msg":"Server starting on :8080","time":"2024-12-26T19:30:45+08:00"}
+### 可以查看到启动信息，看到类似如下输出表示成功启动
+INFO[0000] Configuration initialized successfully.      
+INFO[0000] Config loaded successfully.   
+    _______ __             
+   / ____(_) /_  ___  _____
+  / /_  / / __ \/ _ \/ ___/
+ / __/ / / /_/ /  __/ /    
+/_/   /_/_.___/\___/_/          v3.0.0-beta.4
+--------------------------------------------------
+INFO Server started on: 	http://127.0.0.1:8080 (bound on host 0.0.0.0 and port 8080)
+INFO Total handlers count: 	13
+INFO Prefork: 			Disabled
+INFO PID: 			29322
+INFO Total process count: 	1
 ###
 
 ```

@@ -30,6 +30,11 @@ import (
    }
    return result
  }
+
+ func Text(ctx fiber.Ctx, data interface{}) error {
+  ctx.Set(fiber.HeaderContentType, fiber.MIMETextPlainCharsetUTF8)
+  return ctx.Status(fiber.StatusOK).SendString(data.(string))
+}
  
  func Success(ctx fiber.Ctx, data interface{}) error {
    return ctx.Status(fiber.StatusOK).JSON(Response{

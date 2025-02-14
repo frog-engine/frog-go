@@ -9,6 +9,7 @@ package routes
 
 import (
   "database/sql"
+  "fmt"
 
   "github.com/frog-engine/frog-go/config"
   "github.com/frog-engine/frog-go/internal/cache"
@@ -26,16 +27,28 @@ import (
 func SetupRouter(app *fiber.App) {
   // 加载配置并连接数据库
   config := config.GetConfig()
-  db := initSqlDB(config)
+  fmt.Println("config:", config)
+  // db := initSqlDB(config)
 
   // 主页路由
   app.Get("/", func(c fiber.Ctx) error {
-    return response.Success(c, map[string]string{
-      "name":        "欢迎来到 frog-go Image Transcoding Service",
+
+    data := map[string]string{
+      "title":       "Welcome to frog-go Transcoding Service",
       "version":     "1.0",
-      "description": "High Performance Image Transcoding API",
+      "description": "High Performance Image Transcoding API service.",
       "author":      "jarryli@gmail.com",
-    })
+    }
+
+    // return response.Success(c, data)
+
+    keys := []string{"title", "version", "description", "author"}
+    var responseText string
+    for _, key := range keys {
+      responseText += key + ": " + data[key] + "\n"
+    }
+
+    return response.Text(c, responseText)
   })
 
   // 健康检查路由
@@ -53,8 +66,8 @@ func SetupRouter(app *fiber.App) {
     middleware.RequestLoggerMiddleware,
   ))
 
-  initUserRouter(app, db)
-  initImageRouter(app, db)
+  // initUserRouter(app, db)
+  initImageRouter(app, nil)
 
 }
 
@@ -72,9 +85,10 @@ func initImageRouter(app *fiber.App, _ *sql.DB) {
   // 初始化依赖项
   imageCache := cache.NewImageCache()
   imageTools := tools.NewImageTools()
-  transcodingService := services.NewTranscodingService(imageCache, imageTools)
-  imageHandler := handlers.NewImageHandler(transcodingService)
+  imageService := services.NewImageService(imageCache, imageTools)
+  imageHandler := handlers.NewImageHandler(imageService)
   // Image 路由处理
+  // curl -X GET "http://localhost:8080/api/image/process?url=https://dss1.bdstatic.com/kvoZeXSm1A5BphGlnYG/skin_zoom/777.jpg&quality=80&crop=10,10,200,200&format=jpg&scale=1.5&rotate=90&overlay=tmp/overlay.jpg"
   app.Get("/api/image/process", middleware.APIChain(imageHandler.ProcessImage, "/api/image"))
 }
 

@@ -1,8 +1,6 @@
 package api
 
 import (
-  "image"
-
   "github.com/frog-engine/frog-sdk/config"
   "github.com/frog-engine/frog-sdk/internal/models"
 )
@@ -11,7 +9,7 @@ import (
 type Api interface {
   Name() string
   GetConfig() *config.Config
-  ReadImageBlob(imageData []byte) (image.Image, error)
+  ReadImageBlob(imageData []byte) ([]byte, error)
   GetImageInfo(req *models.ImageInfoRequest) ([]*models.ImageInfoResponse, error)
   ImageConvert(req *models.ConvertRequest) (*models.ConvertResponse, error)
   GetTaskInfo(taskID string) (*models.TaskResponse, error)

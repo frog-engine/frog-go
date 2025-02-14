@@ -8,6 +8,8 @@
 package tools
 
 import (
+  "fmt"
+
   "github.com/frog-engine/frog-go/pkg/logger"
   frogsdk "github.com/frog-engine/frog-sdk"
   "github.com/gofiber/fiber/v3"
@@ -32,7 +34,7 @@ func (t *ImageTools) Process(c fiber.Ctx, imageData []byte, width int, height in
   // 从 Fiber context 获取原生 context
   // ctx := c.Context()
 
-  // // 读取图片数据
+  // 读取图片数据
   // if err := frogApi.ReadImageBlob(imageData); err != nil {
   //   return nil, fmt.Errorf("failed to read image data: %w", err)
   // }
@@ -60,12 +62,11 @@ func (t *ImageTools) Process(c fiber.Ctx, imageData []byte, width int, height in
   //   return nil, fmt.Errorf("unsupported image format: %s", format)
   // }
 
-  // // 获取处理后的图片数据
-  // processedImage, err := frogApi.GetImageBlob()
-  // if err != nil {
-  //   return nil, fmt.Errorf("failed to get image blob: %w", err)
-  // }
+  // 获取处理后的图片数据
+  processedImage, err := frogApi.ReadImageBlob(imageData)
+  if err != nil {
+    return nil, fmt.Errorf("failed to get image blob: %w", err)
+  }
 
-  // return processedImage, nil
-  return nil, nil
+  return processedImage, nil
 }

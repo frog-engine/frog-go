@@ -1,8 +1,6 @@
 package api
 
 import (
-  "image"
-
   "github.com/frog-engine/frog-sdk/config"
   "github.com/frog-engine/frog-sdk/internal/models"
   "github.com/frog-engine/frog-sdk/internal/services"
@@ -46,7 +44,7 @@ func (s *ImageApi) GetImageInfo(req *models.ImageInfoRequest) ([]*models.ImageIn
   return s.imageService.GetImageInfo(req)
 }
 
-func (s *ImageApi) ReadImageBlob(imageData []byte) (image.Image, error) {
+func (s *ImageApi) ReadImageBlob(imageData []byte) ([]byte, error) {
   return s.imageService.ReadImageBlob(imageData)
 }
 
