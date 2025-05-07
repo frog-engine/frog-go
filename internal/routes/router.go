@@ -66,8 +66,8 @@ func SetupRouter(app *fiber.App) {
     middleware.RequestLoggerMiddleware,
   ))
 
-  // initUserRouter(app, db)
-  initImageRouter(app, nil)
+  // initUserRoutes(app, db)
+  initImageRoutes(app, nil)
 
 }
 
@@ -81,7 +81,7 @@ func initSqlDB(config *config.Config) *sql.DB {
   return db
 }
 
-func initImageRouter(app *fiber.App, _ *sql.DB) {
+func initImageRoutes(app *fiber.App, _ *sql.DB) {
   // 初始化依赖项
   imageCache := cache.NewImageCache()
   imageTools := tools.NewImageTools()
@@ -92,7 +92,7 @@ func initImageRouter(app *fiber.App, _ *sql.DB) {
   app.Get("/api/image/process", middleware.APIChain(imageHandler.ProcessImage, "/api/image"))
 }
 
-func initUserRouter(app *fiber.App, db *sql.DB) {
+func initUserRoutes(app *fiber.App, db *sql.DB) {
   // 初始化用户服务和处理器
   userRepo := repositories.NewSQLUserRepository(db)
   userService := services.NewUserService(userRepo)

@@ -69,7 +69,7 @@ func (s *ImageService) ProcessImage(c fiber.Ctx, imageRequest models.ImageReques
   // }
   // processedImage, err := s.imageTools.Process(c, imageBytes, width, height, format)
 
-  processedImage, err := s.imageTools.Process(c, originalImageData, 100, 100, imageRequest.Format)
+  processedImage, err := s.imageTools.Process(c, originalImageData, imageRequest)
   if err != nil {
     return nil, fmt.Errorf("processing failed: %w", err)
   }

@@ -9,7 +9,9 @@ package tools
 
 import (
   "fmt"
+  "reflect"
 
+  "github.com/frog-engine/frog-go/internal/models"
   "github.com/frog-engine/frog-go/pkg/logger"
   frogsdk "github.com/frog-engine/frog-sdk"
   "github.com/gofiber/fiber/v3"
@@ -26,18 +28,30 @@ func NewImageTools() *ImageTools {
 // 2. 进行格式转换
 // 3. 进行尺寸调整
 // 4. 返回处理后的图片数据
-func (t *ImageTools) Process(c fiber.Ctx, imageData []byte, width int, height int, format string) ([]byte, error) {
+func (t *ImageTools) Process(c fiber.Ctx, imageData []byte, imageRequest models.ImageRequest) ([]byte, error) {
   // 初始化 sdk
   frogApi := frogsdk.GetAPI()
-  logger.Println("frogApi", frogApi)
 
-  // 从 Fiber context 获取原生 context
-  // ctx := c.Context()
+  logger.Info("image_tools Process:")
 
-  // 读取图片数据
-  // if err := frogApi.ReadImageBlob(imageData); err != nil {
+  // 使用反射打印所有方法
+  apiType := reflect.TypeOf(frogApi)
+  logger.Printf("Available methods for frogApi:")
+  for i := 0; i < apiType.NumMethod(); i++ {
+    method := apiType.Method(i)
+    logger.Printf("Method: %s", method.Name)
+  }
+
+  // imgInfo, error = frogApi.GetImageInfo(imageData)
+
+  // 读取图片二进制
+  // img, err := frogApi.ReadImageBlob(imageData)
+  // if err != nil {
   //   return nil, fmt.Errorf("failed to read image data: %w", err)
   // }
+
+  // 格式转换
+  logger.Printf("convert to format: %+v\n", imageRequest.Format)
 
   // // 调整图片大小
   // if width > 0 && height > 0 {
