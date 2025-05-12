@@ -87,9 +87,12 @@ func initImageRoutes(app *fiber.App, _ *sql.DB) {
   imageTools := tools.NewImageTools()
   imageService := services.NewImageService(imageCache, imageTools)
   imageHandler := handlers.NewImageHandler(imageService)
-  // Image 路由处理
+  // Image 同步图片处理
   // curl -X GET "http://localhost:8080/api/image/process?url=https://dss1.bdstatic.com/kvoZeXSm1A5BphGlnYG/skin_zoom/777.jpg&quality=80&crop=10,10,200,200&format=jpg&scale=1.5&rotate=90&overlay=tmp/overlay.jpg"
   app.Get("/api/image/process", middleware.APIChain(imageHandler.ProcessImage, "/api/image"))
+
+  // TODO:异步图片处理，生成一个任务，存入任务库，通知work处理图片，再更新任务更新任务状态，最后回调请求方
+  // app.Get("/api/image/async/process", middleware.APIChain(imageHandler.ProcessImage, "/api/image"))
 }
 
 func initUserRoutes(app *fiber.App, db *sql.DB) {

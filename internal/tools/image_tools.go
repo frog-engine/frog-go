@@ -8,13 +8,13 @@
 package tools
 
 import (
-  "fmt"
-  "reflect"
+	"fmt"
+	"reflect"
 
-  "github.com/frog-engine/frog-go/internal/models"
-  "github.com/frog-engine/frog-go/pkg/logger"
-  frogsdk "github.com/frog-engine/frog-sdk"
-  "github.com/gofiber/fiber/v3"
+	"github.com/frog-engine/frog-go/internal/models"
+	"github.com/frog-engine/frog-go/pkg/logger"
+	frogsdk "github.com/frog-engine/frog-sdk"
+	"github.com/gofiber/fiber/v3"
 )
 
 type ImageTools struct{}
@@ -42,13 +42,12 @@ func (t *ImageTools) Process(c fiber.Ctx, imageData []byte, imageRequest models.
     logger.Printf("Method: %s", method.Name)
   }
 
-  // imgInfo, error = frogApi.GetImageInfo(imageData)
-
   // 读取图片二进制
-  // img, err := frogApi.ReadImageBlob(imageData)
-  // if err != nil {
-  //   return nil, fmt.Errorf("failed to read image data: %w", err)
-  // }
+  imgMeta, err := frogApi.ReadImageBlob(imageData)
+  if err != nil {
+    return nil, fmt.Errorf("failed to read image data: %w", err)
+  }
+  logger.Printf("img: %+v\n", imgMeta)
 
   // 格式转换
   logger.Printf("convert to format: %+v\n", imageRequest.Format)
